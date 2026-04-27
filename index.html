@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PCII Academy</title>
+    <style>
+        body { background: #0f0f0f; color: white; font-family: sans-serif; padding: 20px; }
+        input, select, button { display: block; width: 100%; margin: 10px 0; padding: 10px; }
+        button { background: #d4af37; font-weight: bold; cursor: pointer; }
+        .result-card { border: 1px solid #d4af37; padding: 10px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <h1>PCII ACADEMY</h1>
+    
+    <input type="text" id="searchBox" placeholder="Search instrument (e.g. Drumset)">
+    <button onclick="searchTutor()">Search</button>
+    <div id="searchResults"></div>
+
+    <hr>
+
+    <form id="enrollForm">
+        <input type="text" id="fname" placeholder="Full Name" required>
+        <input type="text" id="phone" placeholder="Phone Number" required>
+        <select id="pay"><option>PayPal</option><option>Bank Transfer</option></select>
+        <button type="submit">Enroll Now</button>
+    </form>
+
+    <script>
+        // Search Function
+        async function searchTutor() {
+            const item = document.getElementById('searchBox').value;
+            const res = await fetch('http://localhost:3000/search?item=' + item);
+            const data = await res.json();
+            const div = document.getElementById('searchResults');
+            div.innerHTML = data.length ? 
+                data.map(t => "<div class='result-card'>" + t.name + " - " + t.instrument + "</div>").join('') : 
+                "No tutors found.";
+        }
+
+        // Enrollment Function
+        document.getElementById('enrollForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                fullname: document.getElementById('fname').value,
+                phone: document.getElementById('phone').value,
+                payment: document.getElementById('pay').value
+            };
+            const res = await fetch('http://localhost:3000/enroll', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+            if (res.ok) alert("Student registered and saved to students.json!");
+        });
+    </script>
+</body>
+</html>
